@@ -269,7 +269,7 @@ pub async fn get_public_rooms_route(
     put("/_matrix/federation/v1/send/<_>", data = "<body>")
 )]
 pub fn send_transaction_message_route(
-    db: State<'_, Database>,
+    _db: State<'_, Database>,
     body: Ruma<send_transaction_message::v1::Request>,
 ) -> ConduitResult<send_transaction_message::v1::Response> {
     dbg!(&*body);

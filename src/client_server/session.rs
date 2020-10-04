@@ -8,6 +8,13 @@ use ruma::{
     },
     UserId,
 };
+use serde::Deserialize;
+
+#[derive(Debug, Deserialize)]
+struct Claims {
+    sub: String,
+    exp: usize,
+}
 
 #[cfg(feature = "conduit_bin")]
 use rocket::{get, post};
@@ -43,40 +50,53 @@ pub fn login_route(
     body: Ruma<login::Request>,
 ) -> ConduitResult<login::Response> {
     // Validate login method
-    let user_id =
-        // TODO: Other login methods
-        if let (login::UserInfo::MatrixId(username), login::LoginInfo::Password { password }) =
-            (body.user.clone(), body.login_info.clone())
-        {
+    let user_id = match &body.login_info {
+        login::LoginInfo::Password { password } => {
+            let username = if let login::UserInfo::MatrixId(matrix_id) = body.user.clone() {
+                matrix_id
+            } else {
+                return Err(Error::BadRequest(ErrorKind::Forbidden, "Bad login type."));
+            };
             let user_id = UserId::parse_with_server_name(username, db.globals.server_name())
-                .map_err(|_| Error::BadRequest(
-                    ErrorKind::InvalidUsername,
-                    "Username is invalid."
-                ))?;
-            let hash = db.users.password_hash(&user_id)?
-                .ok_or(Error::BadRequest(
-                    ErrorKind::Forbidden,
-                    "Wrong username or password."
-                ))?;
+                .map_err(|_| {
+                    Error::BadRequest(ErrorKind::InvalidUsername, "Username is invalid.")
+                })?;
+            let hash = db.users.password_hash(&user_id)?.ok_or(Error::BadRequest(
+                ErrorKind::Forbidden,
+                "Wrong username or password.",
+            ))?;
 
             if hash.is_empty() {
                 return Err(Error::BadRequest(
                     ErrorKind::UserDeactivated,
-                    "The user has been deactivated"
+                    "The user has been deactivated",
                 ));
             }
 
-            let hash_matches =
-                argon2::verify_encoded(&hash, password.as_bytes()).unwrap_or(false);
+            let hash_matches = argon2::verify_encoded(&hash, password.as_bytes()).unwrap_or(false);
 
             if !hash_matches {
-                return Err(Error::BadRequest(ErrorKind::Forbidden, "Wrong username or password."));
+                return Err(Error::BadRequest(
+                    ErrorKind::Forbidden,
+                    "Wrong username or password.",
+                ));
             }
 
             user_id
-        } else {
-            return Err(Error::BadRequest(ErrorKind::Forbidden, "Bad login type."));
-        };
+        }
+        login::LoginInfo::Token { token } => {
+            let token = jsonwebtoken::decode::<Claims>(
+                &token,
+                &jsonwebtoken::DecodingKey::from_secret(db.globals.jwt_secret().as_ref()),
+                &jsonwebtoken::Validation::default(),
+            )
+            .map_err(|_| Error::BadRequest(ErrorKind::InvalidUsername, "Token is invalid."))?;
+            let username = token.claims.sub;
+            UserId::parse_with_server_name(username, db.globals.server_name()).map_err(|_| {
+                Error::BadRequest(ErrorKind::InvalidUsername, "Username is invalid.")
+            })?
+        }
+    };
 
     // Generate new device id if the user didn't specify one
     let device_id = body
@@ -88,14 +108,16 @@ pub fn login_route(
     // Generate a new token for the device
     let token = utils::random_string(TOKEN_LENGTH);
 
-    // TODO: Don't always create a new device
-    // Add device
-    db.users.create_device(
-        &user_id,
-        &device_id,
-        &token,
-        body.initial_device_display_name.clone(),
-    )?;
+    if let login::LoginInfo::Password { password: _ } = body.login_info {
+        // TODO: Don't always create a new device
+        // Add device
+        db.users.create_device(
+            &user_id,
+            &device_id,
+            &token,
+            body.initial_device_display_name.clone(),
+        )?;
+    }
 
     Ok(login::Response {
         user_id,

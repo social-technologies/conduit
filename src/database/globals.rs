@@ -12,6 +12,7 @@ pub struct Globals {
     max_request_size: u32,
     registration_disabled: bool,
     encryption_disabled: bool,
+    jwt_secret: String,
 }
 
 impl Globals {
@@ -41,6 +42,12 @@ impl Globals {
                 .map_err(|_| Error::BadConfig("Invalid max_request_size."))?,
             registration_disabled: config.get_bool("registration_disabled").unwrap_or(false),
             encryption_disabled: config.get_bool("encryption_disabled").unwrap_or(false),
+            jwt_secret: config
+                .get_str("jwt_secret")
+                .map(std::string::ToString::to_string)
+                .unwrap_or_else(|_| {
+                    std::env::var("JWT_SECRET").unwrap_or_else(|_| "jwt_secret".to_string())
+                }),
         })
     }
 
@@ -85,5 +92,9 @@ impl Globals {
 
     pub fn encryption_disabled(&self) -> bool {
         self.encryption_disabled
+    }
+
+    pub fn jwt_secret(&self) -> &str {
+        &self.jwt_secret
     }
 }
