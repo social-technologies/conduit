@@ -31,8 +31,10 @@ impl Globals {
             reqwest_client: reqwest::Client::new(),
             server_name: config
                 .get_str("server_name")
-                .unwrap_or("localhost")
-                .to_string()
+                .map(std::string::ToString::to_string)
+                .unwrap_or_else(|_| {
+                    std::env::var("SERVER_NAME").unwrap_or_else(|_| "localhost".to_string())
+                })
                 .try_into()
                 .map_err(|_| Error::BadConfig("Invalid server_name."))?,
             max_request_size: config
