@@ -17,7 +17,7 @@ use rocket::{get, put};
     put("/_matrix/client/r0/rooms/<_>/send/<_>/<_>", data = "<body>")
 )]
 pub fn send_message_event_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<send_message_event::IncomingRequest>,
 ) -> ConduitResult<send_message_event::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -78,7 +78,7 @@ pub fn send_message_event_route(
     get("/_matrix/client/r0/rooms/<_>/messages", data = "<body>")
 )]
 pub fn get_message_events_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_message_events::Request>,
 ) -> ConduitResult<get_message_events::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");

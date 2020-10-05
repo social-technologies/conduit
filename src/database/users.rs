@@ -272,7 +272,7 @@ impl Users {
         device_id: &DeviceId,
         one_time_key_key: &DeviceKeyId,
         one_time_key_value: &OneTimeKey,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         let mut key = user_id.to_string().as_bytes().to_vec();
         key.push(0xff);
@@ -321,7 +321,7 @@ impl Users {
         user_id: &UserId,
         device_id: &DeviceId,
         key_algorithm: &DeviceKeyAlgorithm,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<Option<(DeviceKeyId, OneTimeKey)>> {
         let mut prefix = user_id.to_string().as_bytes().to_vec();
         prefix.push(0xff);
@@ -397,7 +397,7 @@ impl Users {
         device_id: &DeviceId,
         device_keys: &DeviceKeys,
         rooms: &super::rooms::Rooms,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         let mut userdeviceid = user_id.to_string().as_bytes().to_vec();
         userdeviceid.push(0xff);
@@ -420,7 +420,7 @@ impl Users {
         self_signing_key: &Option<CrossSigningKey>,
         user_signing_key: &Option<CrossSigningKey>,
         rooms: &super::rooms::Rooms,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         // TODO: Check signatures
 
@@ -520,7 +520,7 @@ impl Users {
         signature: (String, String),
         sender_id: &UserId,
         rooms: &super::rooms::Rooms,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         let mut key = target_id.to_string().as_bytes().to_vec();
         key.push(0xff);
@@ -594,7 +594,7 @@ impl Users {
         &self,
         user_id: &UserId,
         rooms: &super::rooms::Rooms,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         let count = globals.next_count()?.to_be_bytes();
         for room_id in rooms.rooms_joined(&user_id).filter_map(|r| r.ok()) {
@@ -711,7 +711,7 @@ impl Users {
         target_device_id: &DeviceId,
         event_type: &EventType,
         content: serde_json::Value,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         let mut key = target_user_id.to_string().as_bytes().to_vec();
         key.push(0xff);

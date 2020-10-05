@@ -257,7 +257,7 @@ impl Rooms {
     pub fn append_pdu(
         &self,
         pdu_builder: PduBuilder,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
         account_data: &super::account_data::AccountData,
     ) -> Result<EventId> {
         let PduBuilder {
@@ -770,7 +770,7 @@ impl Rooms {
         mut member_content: member::MemberEventContent,
         sender: &UserId,
         account_data: &super::account_data::AccountData,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         let membership = member_content.membership;
         let mut userroom_id = user_id.to_string().as_bytes().to_vec();
@@ -940,7 +940,7 @@ impl Rooms {
         &self,
         alias: &RoomAliasId,
         room_id: Option<&RoomId>,
-        globals: &super::globals::Globals,
+        globals: &super::globals::Globals<'_>,
     ) -> Result<()> {
         if let Some(room_id) = room_id {
             // New alias

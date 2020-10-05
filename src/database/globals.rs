@@ -4,7 +4,7 @@ use std::convert::TryInto;
 
 pub const COUNTER: &str = "c";
 
-pub struct Globals {
+pub struct Globals<'a> {
     pub(super) globals: sled::Tree,
     keypair: ruma::signatures::Ed25519KeyPair,
     reqwest_client: reqwest::Client,
@@ -12,10 +12,10 @@ pub struct Globals {
     max_request_size: u32,
     registration_disabled: bool,
     encryption_disabled: bool,
-    jwt_secret: String,
+    jwt_decoding_key: jsonwebtoken::DecodingKey<'a>,
 }
 
-impl Globals {
+impl Globals<'_> {
     pub fn load(globals: sled::Tree, config: &rocket::Config) -> Result<Self> {
         let keypair = ruma::signatures::Ed25519KeyPair::new(
             &*globals
@@ -24,6 +24,15 @@ impl Globals {
             "key1".to_owned(),
         )
         .map_err(|_| Error::bad_database("Private or public keys are invalid."))?;
+
+        let jwt_secret = config
+            .get_str("jwt_secret")
+            .map(std::string::ToString::to_string)
+            .unwrap_or_else(|_| {
+                std::env::var("JWT_SECRET").unwrap_or_else(|_| "jwt_secret".to_string())
+            });
+        let jwt_decoding_key =
+            jsonwebtoken::DecodingKey::from_secret(jwt_secret.as_ref()).into_static();
 
         Ok(Self {
             globals,
@@ -44,12 +53,7 @@ impl Globals {
                 .map_err(|_| Error::BadConfig("Invalid max_request_size."))?,
             registration_disabled: config.get_bool("registration_disabled").unwrap_or(false),
             encryption_disabled: config.get_bool("encryption_disabled").unwrap_or(false),
-            jwt_secret: config
-                .get_str("jwt_secret")
-                .map(std::string::ToString::to_string)
-                .unwrap_or_else(|_| {
-                    std::env::var("JWT_SECRET").unwrap_or_else(|_| "jwt_secret".to_string())
-                }),
+            jwt_decoding_key,
         })
     }
 
@@ -96,7 +100,7 @@ impl Globals {
         self.encryption_disabled
     }
 
-    pub fn jwt_secret(&self) -> &str {
-        &self.jwt_secret
+    pub fn jwt_decoding_key(&self) -> &jsonwebtoken::DecodingKey<'_> {
+        &self.jwt_decoding_key
     }
 }

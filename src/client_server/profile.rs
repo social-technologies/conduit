@@ -20,7 +20,7 @@ use std::convert::TryInto;
     put("/_matrix/client/r0/profile/<_>/displayname", data = "<body>")
 )]
 pub fn set_displayname_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<set_display_name::Request>,
 ) -> ConduitResult<set_display_name::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -97,7 +97,7 @@ pub fn set_displayname_route(
     get("/_matrix/client/r0/profile/<_>/displayname", data = "<body>")
 )]
 pub fn get_displayname_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_display_name::Request>,
 ) -> ConduitResult<get_display_name::Response> {
     Ok(get_display_name::Response {
@@ -111,7 +111,7 @@ pub fn get_displayname_route(
     put("/_matrix/client/r0/profile/<_>/avatar_url", data = "<body>")
 )]
 pub fn set_avatar_url_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<set_avatar_url::Request>,
 ) -> ConduitResult<set_avatar_url::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -200,7 +200,7 @@ pub fn set_avatar_url_route(
     get("/_matrix/client/r0/profile/<_>/avatar_url", data = "<body>")
 )]
 pub fn get_avatar_url_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_avatar_url::Request>,
 ) -> ConduitResult<get_avatar_url::Response> {
     Ok(get_avatar_url::Response {
@@ -214,7 +214,7 @@ pub fn get_avatar_url_route(
     get("/_matrix/client/r0/profile/<_>", data = "<body>")
 )]
 pub fn get_profile_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_profile::Request>,
 ) -> ConduitResult<get_profile::Response> {
     if !db.users.exists(&body.user_id)? {

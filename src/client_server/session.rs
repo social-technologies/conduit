@@ -46,7 +46,7 @@ pub fn get_login_types_route() -> ConduitResult<get_login_types::Response> {
     post("/_matrix/client/r0/login", data = "<body>")
 )]
 pub fn login_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<login::Request>,
 ) -> ConduitResult<login::Response> {
     // Validate login method
@@ -87,7 +87,7 @@ pub fn login_route(
         login::LoginInfo::Token { token } => {
             let token = jsonwebtoken::decode::<Claims>(
                 &token,
-                &jsonwebtoken::DecodingKey::from_secret(db.globals.jwt_secret().as_ref()),
+                &db.globals.jwt_decoding_key(),
                 &jsonwebtoken::Validation::default(),
             )
             .map_err(|_| Error::BadRequest(ErrorKind::InvalidUsername, "Token is invalid."))?;
@@ -140,7 +140,7 @@ pub fn login_route(
     post("/_matrix/client/r0/logout", data = "<body>")
 )]
 pub fn logout_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<logout::Request>,
 ) -> ConduitResult<logout::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -165,7 +165,7 @@ pub fn logout_route(
     post("/_matrix/client/r0/logout/all", data = "<body>")
 )]
 pub fn logout_all_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<logout_all::Request>,
 ) -> ConduitResult<logout_all::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
