@@ -13,7 +13,7 @@ const MXC_LENGTH: usize = 256;
 
 #[cfg_attr(feature = "conduit_bin", get("/_matrix/media/r0/config"))]
 pub fn get_media_config_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
 ) -> ConduitResult<get_media_config::Response> {
     Ok(get_media_config::Response {
         upload_size: db.globals.max_request_size().into(),
@@ -26,7 +26,7 @@ pub fn get_media_config_route(
     post("/_matrix/media/r0/upload", data = "<body>")
 )]
 pub fn create_content_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<create_content::Request>,
 ) -> ConduitResult<create_content::Response> {
     let mxc = format!(
@@ -52,7 +52,7 @@ pub fn create_content_route(
     )
 )]
 pub fn get_content_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_content::Request>,
     _server_name: String,
     _media_id: String,
@@ -84,7 +84,7 @@ pub fn get_content_route(
     )
 )]
 pub fn get_content_thumbnail_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_content_thumbnail::Request>,
     _server_name: String,
     _media_id: String,

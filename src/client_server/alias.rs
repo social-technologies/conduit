@@ -16,7 +16,7 @@ use rocket::{delete, get, put};
     put("/_matrix/client/r0/directory/room/<_>", data = "<body>")
 )]
 pub fn create_alias_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<create_alias::IncomingRequest>,
 ) -> ConduitResult<create_alias::Response> {
     if db.rooms.id_from_alias(&body.room_alias)?.is_some() {
@@ -34,7 +34,7 @@ pub fn create_alias_route(
     delete("/_matrix/client/r0/directory/room/<_>", data = "<body>")
 )]
 pub fn delete_alias_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<delete_alias::IncomingRequest>,
 ) -> ConduitResult<delete_alias::Response> {
     db.rooms.set_alias(&body.room_alias, None, &db.globals)?;
@@ -47,7 +47,7 @@ pub fn delete_alias_route(
     get("/_matrix/client/r0/directory/room/<_>", data = "<body>")
 )]
 pub async fn get_alias_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_alias::IncomingRequest>,
 ) -> ConduitResult<get_alias::Response> {
     if body.room_alias.server_name() != db.globals.server_name() {

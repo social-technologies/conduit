@@ -30,7 +30,7 @@ use rocket::{get, post};
     post("/_matrix/client/r0/rooms/<_>/join", data = "<body>")
 )]
 pub async fn join_room_by_id_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<join_room_by_id::IncomingRequest>,
 ) -> ConduitResult<join_room_by_id::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -138,8 +138,8 @@ pub async fn join_room_by_id_route(
     post("/_matrix/client/r0/join/<_>", data = "<body>")
 )]
 pub async fn join_room_by_id_or_alias_route(
-    db: State<'_, Database>,
-    db2: State<'_, Database>,
+    db: State<'_, Database<'_>>,
+    db2: State<'_, Database<'_>>,
     body: Ruma<join_room_by_id_or_alias::Request>,
 ) -> ConduitResult<join_room_by_id_or_alias::Response> {
     let room_id = match RoomId::try_from(body.room_id_or_alias.clone()) {
@@ -181,7 +181,7 @@ pub async fn join_room_by_id_or_alias_route(
     post("/_matrix/client/r0/rooms/<_>/leave", data = "<body>")
 )]
 pub fn leave_room_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<leave_room::IncomingRequest>,
 ) -> ConduitResult<leave_room::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -227,7 +227,7 @@ pub fn leave_room_route(
     post("/_matrix/client/r0/rooms/<_>/invite", data = "<body>")
 )]
 pub fn invite_user_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<invite_user::Request>,
 ) -> ConduitResult<invite_user::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -265,7 +265,7 @@ pub fn invite_user_route(
     post("/_matrix/client/r0/rooms/<_>/kick", data = "<body>")
 )]
 pub fn kick_user_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<kick_user::Request>,
 ) -> ConduitResult<kick_user::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -312,7 +312,7 @@ pub fn kick_user_route(
     post("/_matrix/client/r0/rooms/<_>/ban", data = "<body>")
 )]
 pub fn ban_user_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<ban_user::Request>,
 ) -> ConduitResult<ban_user::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -367,7 +367,7 @@ pub fn ban_user_route(
     post("/_matrix/client/r0/rooms/<_>/unban", data = "<body>")
 )]
 pub fn unban_user_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<unban_user::Request>,
 ) -> ConduitResult<unban_user::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -413,7 +413,7 @@ pub fn unban_user_route(
     post("/_matrix/client/r0/rooms/<_>/forget", data = "<body>")
 )]
 pub fn forget_room_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<forget_room::Request>,
 ) -> ConduitResult<forget_room::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -428,7 +428,7 @@ pub fn forget_room_route(
     get("/_matrix/client/r0/joined_rooms", data = "<body>")
 )]
 pub fn joined_rooms_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<joined_rooms::Request>,
 ) -> ConduitResult<joined_rooms::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -448,7 +448,7 @@ pub fn joined_rooms_route(
     get("/_matrix/client/r0/rooms/<_>/members", data = "<body>")
 )]
 pub fn get_member_events_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_member_events::Request>,
 ) -> ConduitResult<get_member_events::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -476,7 +476,7 @@ pub fn get_member_events_route(
     get("/_matrix/client/r0/rooms/<_>/joined_members", data = "<body>")
 )]
 pub fn joined_members_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<joined_members::Request>,
 ) -> ConduitResult<joined_members::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");

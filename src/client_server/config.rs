@@ -18,7 +18,7 @@ use rocket::{get, put};
     put("/_matrix/client/r0/user/<_>/account_data/<_>", data = "<body>")
 )]
 pub fn set_global_account_data_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<set_global_account_data::Request>,
 ) -> ConduitResult<set_global_account_data::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -49,7 +49,7 @@ pub fn set_global_account_data_route(
     get("/_matrix/client/r0/user/<_>/account_data/<_>", data = "<body>")
 )]
 pub fn get_global_account_data_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_global_account_data::Request>,
 ) -> ConduitResult<get_global_account_data::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");

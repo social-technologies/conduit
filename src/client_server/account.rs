@@ -32,7 +32,7 @@ const GUEST_NAME_LENGTH: usize = 10;
     get("/_matrix/client/r0/register/available", data = "<body>")
 )]
 pub fn get_register_available_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_username_availability::Request>,
 ) -> ConduitResult<get_username_availability::Response> {
     // Validate user id
@@ -74,7 +74,7 @@ pub fn get_register_available_route(
     post("/_matrix/client/r0/register", data = "<body>")
 )]
 pub fn register_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<register::Request>,
 ) -> ConduitResult<register::Response> {
     if db.globals.registration_disabled() {
@@ -222,7 +222,7 @@ pub fn register_route(
     post("/_matrix/client/r0/account/password", data = "<body>")
 )]
 pub fn change_password_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<change_password::Request>,
 ) -> ConduitResult<change_password::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -304,7 +304,7 @@ pub fn whoami_route(body: Ruma<whoami::Request>) -> ConduitResult<whoami::Respon
     post("/_matrix/client/r0/account/deactivate", data = "<body>")
 )]
 pub fn deactivate_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<deactivate::Request>,
 ) -> ConduitResult<deactivate::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");

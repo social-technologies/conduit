@@ -17,7 +17,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-pub async fn request_well_known(db: &crate::Database, destination: &str) -> Option<String> {
+pub async fn request_well_known(db: &crate::Database<'_>, destination: &str) -> Option<String> {
     let body: serde_json::Value = serde_json::from_str(
         &db.globals
             .reqwest_client()
@@ -37,7 +37,7 @@ pub async fn request_well_known(db: &crate::Database, destination: &str) -> Opti
 }
 
 pub async fn send_request<T: OutgoingRequest>(
-    db: &crate::Database,
+    db: &crate::Database<'static>,
     destination: String,
     request: T,
 ) -> Result<T::IncomingResponse>
@@ -162,7 +162,7 @@ pub fn get_server_version() -> ConduitResult<get_server_version::Response> {
 }
 
 #[cfg_attr(feature = "conduit_bin", get("/_matrix/key/v2/server"))]
-pub fn get_server_keys(db: State<'_, Database>) -> Json<String> {
+pub fn get_server_keys(db: State<'_, Database<'_>>) -> Json<String> {
     let mut verify_keys = BTreeMap::new();
     verify_keys.insert(
         format!("ed25519:{}", db.globals.keypair().version()),
@@ -194,7 +194,7 @@ pub fn get_server_keys(db: State<'_, Database>) -> Json<String> {
 }
 
 #[cfg_attr(feature = "conduit_bin", get("/_matrix/key/v2/server/<_>"))]
-pub fn get_server_keys_deprecated(db: State<'_, Database>) -> Json<String> {
+pub fn get_server_keys_deprecated(db: State<'_, Database<'_>>) -> Json<String> {
     get_server_keys(db)
 }
 
@@ -203,7 +203,7 @@ pub fn get_server_keys_deprecated(db: State<'_, Database>) -> Json<String> {
     post("/_matrix/federation/v1/publicRooms", data = "<body>")
 )]
 pub async fn get_public_rooms_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_public_rooms::v1::Request>,
 ) -> ConduitResult<get_public_rooms::v1::Response> {
     let Ruma {
@@ -269,7 +269,7 @@ pub async fn get_public_rooms_route(
     put("/_matrix/federation/v1/send/<_>", data = "<body>")
 )]
 pub fn send_transaction_message_route(
-    db: State<'_, Database>,
+    _db: State<'_, Database<'_>>,
     body: Ruma<send_transaction_message::v1::Request>,
 ) -> ConduitResult<send_transaction_message::v1::Response> {
     dbg!(&*body);

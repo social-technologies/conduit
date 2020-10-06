@@ -20,7 +20,7 @@ use rocket::{get, put};
     put("/_matrix/client/r0/rooms/<_>/state/<_>/<_>", data = "<body>")
 )]
 pub fn send_state_event_for_key_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<send_state_event_for_key::IncomingRequest>,
 ) -> ConduitResult<send_state_event_for_key::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -86,7 +86,7 @@ pub fn send_state_event_for_key_route(
     put("/_matrix/client/r0/rooms/<_>/state/<_>", data = "<body>")
 )]
 pub fn send_state_event_for_empty_key_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<send_state_event_for_empty_key::IncomingRequest>,
 ) -> ConduitResult<send_state_event_for_empty_key::Response> {
     // This just calls send_state_event_for_key_route
@@ -128,7 +128,7 @@ pub fn send_state_event_for_empty_key_route(
     get("/_matrix/client/r0/rooms/<_>/state", data = "<body>")
 )]
 pub fn get_state_events_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_state_events::Request>,
 ) -> ConduitResult<get_state_events::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -156,7 +156,7 @@ pub fn get_state_events_route(
     get("/_matrix/client/r0/rooms/<_>/state/<_>/<_>", data = "<body>")
 )]
 pub fn get_state_events_for_key_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_state_events_for_key::Request>,
 ) -> ConduitResult<get_state_events_for_key::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
@@ -188,7 +188,7 @@ pub fn get_state_events_for_key_route(
     get("/_matrix/client/r0/rooms/<_>/state/<_>", data = "<body>")
 )]
 pub fn get_state_events_for_empty_key_route(
-    db: State<'_, Database>,
+    db: State<'_, Database<'_>>,
     body: Ruma<get_state_events_for_empty_key::Request>,
 ) -> ConduitResult<get_state_events_for_empty_key::Response> {
     let sender_id = body.sender_id.as_ref().expect("user is authenticated");
