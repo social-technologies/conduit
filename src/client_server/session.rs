@@ -108,16 +108,12 @@ pub fn login_route(
     // Generate a new token for the device
     let token = utils::random_string(TOKEN_LENGTH);
 
-    if let login::LoginInfo::Password { password: _ } = body.login_info {
-        // TODO: Don't always create a new device
-        // Add device
-        db.users.create_device(
-            &user_id,
-            &device_id,
-            &token,
-            body.initial_device_display_name.clone(),
-        )?;
-    }
+    db.users.create_device(
+        &user_id,
+        &device_id,
+        &token,
+        body.initial_device_display_name.clone(),
+    )?;
 
     Ok(login::Response {
         user_id,
