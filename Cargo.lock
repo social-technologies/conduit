@@ -281,7 +281,7 @@ checksum = "0dbbb57365263e881e805dc77d94697c9118fd94d8da011240555aa7b23445bd"
 
 [[package]]
 name = "conduit"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "base64",
  "directories",
