@@ -1,7 +1,6 @@
 use super::State;
 use super::{DEVICE_ID_LENGTH, TOKEN_LENGTH};
 use crate::{utils, ConduitResult, Database, Error, Ruma};
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use ruma::{
     api::client::{
         error::ErrorKind,
@@ -98,8 +97,6 @@ pub fn login_route(
                 Error::BadRequest(ErrorKind::InvalidUsername, "Username is invalid.")
             })?;
 
-
-
             if !db.users.exists(&user_id)? {
                 db.account_data.update(
                     None,
@@ -112,7 +109,7 @@ pub fn login_route(
                     },
                     &db.globals,
                 )?;
-                db.users.create(&user_id, &generate_random_password())?;
+                db.users.create(&user_id, &utils::random_string(40))?;
             }
 
             user_id
@@ -194,10 +191,4 @@ pub fn logout_all_route(
     }
 
     Ok(logout_all::Response.into())
-}
-
-fn generate_random_password() -> String {
-    const LENGTH: usize = 40;
-
-    thread_rng().sample_iter(&Alphanumeric).take(LENGTH).collect()
 }
