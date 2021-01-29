@@ -1647,6 +1647,7 @@ dependencies = [
  "ruma-events",
  "ruma-federation-api",
  "ruma-identifiers",
+ "ruma-push-gateway-api",
  "ruma-serde",
  "ruma-signatures",
 ]
@@ -1794,6 +1795,21 @@ version = "0.1.1"
 source = "git+https://github.com/ruma/ruma?rev=ee814aa84934530d76f5e4b275d739805b49bdef#ee814aa84934530d76f5e4b275d739805b49bdef"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "ruma-push-gateway-api"
+version = "0.0.1"
+source = "git+https://github.com/ruma/ruma?rev=bba442580d6cd7ed990b2b63387eed2238cbadc8#bba442580d6cd7ed990b2b63387eed2238cbadc8"
+dependencies = [
+ "js_int",
+ "ruma-api",
+ "ruma-common",
+ "ruma-events",
+ "ruma-identifiers",
+ "ruma-serde",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
