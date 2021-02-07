@@ -523,6 +523,8 @@ async fn send_notice(
     Ok(())
 }
 
+/// Internal Notifications struct to avoid liftime errors when batching
+/// the futures.
 #[derive(Debug, Default)]
 struct Notice {
     event_id: Option<EventId>,
