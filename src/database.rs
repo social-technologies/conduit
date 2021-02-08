@@ -106,7 +106,7 @@ impl Database {
         let (admin_sender, admin_receiver) = mpsc::unbounded();
 
         let db = Self {
-            globals: globals::Globals::load(db.open_tree("global")?, config).await?,
+            globals: globals::Globals::load(db.open_tree("global")?, config)?,
             users: users::Users {
                 userid_password: db.open_tree("userid_password")?,
                 userid_displayname: db.open_tree("userid_displayname")?,

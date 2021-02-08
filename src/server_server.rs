@@ -10,7 +10,7 @@ use ruma::{
                 get_server_keys, get_server_version::v1 as get_server_version, ServerSigningKeys,
                 VerifyKey,
             },
-            event::{get_event, get_missing_events, get_room_state_ids},
+            event::get_missing_events,
             query::get_profile_information::{self, v1::ProfileField},
             transactions::send_transaction_message,
         },
@@ -29,7 +29,7 @@ use std::{
 
 pub async fn send_request<T: OutgoingRequest>(
     globals: &crate::database::globals::Globals,
-    destination: Box<ServerName>,
+    destination: &ServerName,
     request: T,
 ) -> Result<T::IncomingResponse>
 where
@@ -43,18 +43,18 @@ where
         .actual_destination_cache
         .read()
         .unwrap()
-        .get(&destination)
+        .get(destination)
         .cloned();
 
     let (actual_destination, host) = if let Some(result) = maybe_result {
         result
     } else {
-        let result = find_actual_destination(globals, &destination).await;
+        let result = find_actual_destination(globals, destination).await;
         globals
             .actual_destination_cache
             .write()
             .unwrap()
-            .insert(destination.clone(), result.clone());
+            .insert(Box::<ServerName>::from(destination), result.clone());
         result
     };
 
@@ -215,7 +215,7 @@ fn add_port_to_hostname(destination_str: String) -> String {
 /// Numbers in comments below refer to bullet points in linked section of specification
 pub(crate) async fn find_actual_destination(
     globals: &crate::database::globals::Globals,
-    destination: &Box<ServerName>,
+    destination: &ServerName,
 ) -> (String, Option<String>) {
     let mut host = None;
 
@@ -558,15 +558,8 @@ pub async fn send_transaction_message_route<'a>(
 
         let next_room_state = db.rooms.append_to_state(&pdu_id, &pdu, &db.globals)?;
 
-        db.rooms.append_pdu(
-            &pdu,
-            value,
-            count,
-            pdu_id.clone().into(),
-            &db.globals,
-            &db.account_data,
-            &db.admin,
-        )?;
+        db.rooms
+            .append_pdu(&pdu, value, count, pdu_id.clone().into(), &db)?;
 
         db.rooms.set_room_state(&room_id, &next_room_state)?;
 

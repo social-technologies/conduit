@@ -1,6 +1,6 @@
 use crate::Error;
 use ruma::{
-    api::{AuthScheme, OutgoingRequest},
+    api::{AuthScheme, IncomingRequest, OutgoingRequest},
     identifiers::{DeviceId, UserId},
     Outgoing,
 };
@@ -40,10 +40,7 @@ pub struct Ruma<T: Outgoing> {
 #[cfg(feature = "conduit_bin")]
 impl<'a, T: Outgoing + OutgoingRequest> FromTransformedData<'a> for Ruma<T>
 where
-    <T as Outgoing>::Incoming: TryFrom<http::request::Request<std::vec::Vec<u8>>> + std::fmt::Debug,
-    <<T as Outgoing>::Incoming as std::convert::TryFrom<
-        http::request::Request<std::vec::Vec<u8>>,
-    >>::Error: std::fmt::Debug,
+    T::Incoming: IncomingRequest,
 {
     type Error = ();
     type Owned = Data;
@@ -153,7 +150,7 @@ where
             let http_request = http_request.body(body.clone()).unwrap();
             debug!("{:?}", http_request);
 
-            match <T as Outgoing>::Incoming::try_from(http_request) {
+            match <T::Incoming as IncomingRequest>::try_from_http_request(http_request) {
                 Ok(t) => Success(Ruma {
                     body: t,
                     sender_user,
@@ -166,7 +163,7 @@ where
                 }),
                 Err(e) => {
                     warn!("{:?}", e);
-                    Failure((Status::raw(583), ()))
+                    Failure((Status::BadRequest, ()))
                 }
             }
         })

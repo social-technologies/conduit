@@ -169,8 +169,13 @@ impl Sending {
                                         (last_failed.0+1, Instant::now())
                                     },
                                     None => {
+                                        (1, Instant::now())
+                                    }
+                                });
                                 servercurrentpdus.remove(&prefix).unwrap();
-                        };
+
+                            }
+                        }
                     },
                     Some(event) = &mut subscriber => {
                         if let sled::Event::Insert { key, .. } = event {
@@ -255,7 +260,7 @@ impl Sending {
                                 );
                             }
                         }
-                    }
+                    },
                 }
             }
         });
@@ -517,12 +522,11 @@ impl Sending {
             )
         })
     }
-    
 
     pub async fn send_federation_request<T: OutgoingRequest>(
         &self,
         globals: &crate::database::globals::Globals,
-        destination: Box<ServerName>,
+        destination: &ServerName,
         request: T,
     ) -> Result<T::IncomingResponse>
     where
