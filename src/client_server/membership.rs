@@ -678,6 +678,17 @@ async fn join_room_by_id_helper(
 
         db.rooms.force_state(room_id, state, &db.globals)?;
     } else {
+        if db
+            .rooms
+            .is_joined(&sender_user, room_id)
+            .unwrap_or(false)
+        {
+            return Err(Error::BadRequest(
+                ErrorKind::Forbidden,
+                "You are a member of the room already.",
+            ));
+        }
+
         let event = member::MemberEventContent {
             membership: member::MembershipState::Join,
             displayname: db.users.displayname(&sender_user)?,
