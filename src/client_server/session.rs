@@ -1,4 +1,4 @@
-use super::{State, DEVICE_ID_LENGTH, TOKEN_LENGTH};
+use super::{State, DEVICE_ID_LENGTH, RANDOM_PASSWORD_LENGTH, TOKEN_LENGTH};
 use crate::{utils, ConduitResult, Database, Error, Ruma};
 use log::info;
 use ruma::{
@@ -6,6 +6,7 @@ use ruma::{
         error::ErrorKind,
         r0::session::{get_login_types, login, logout, logout_all},
     },
+    events::EventType,
     UserId,
 };
 use serde::Deserialize;
@@ -92,9 +93,26 @@ pub async fn login_route(
                 )
                 .map_err(|_| Error::BadRequest(ErrorKind::InvalidUsername, "Token is invalid."))?;
                 let username = token.claims.sub;
-                UserId::parse_with_server_name(username, db.globals.server_name()).map_err(
+                let user_id = UserId::parse_with_server_name(username, db.globals.server_name()).map_err(
                     |_| Error::BadRequest(ErrorKind::InvalidUsername, "Username is invalid."),
-                )?
+                )?;
+
+                if !db.users.exists(&user_id)? {
+                    db.account_data.update(
+                        None,
+                        &user_id,
+                        EventType::PushRules,
+                        &ruma::events::push_rules::PushRulesEvent {
+                            content: ruma::events::push_rules::PushRulesEventContent {
+                                global: crate::push_rules::default_pushrules(&user_id),
+                            },
+                        },
+                        &db.globals,
+                    )?;
+                    db.users.create(&user_id, &utils::random_string(RANDOM_PASSWORD_LENGTH))?;
+                }
+
+                user_id
             } else {
                 return Err(Error::BadRequest(
                     ErrorKind::Unknown,

@@ -72,6 +72,7 @@ use {
 const DEVICE_ID_LENGTH: usize = 10;
 const TOKEN_LENGTH: usize = 256;
 const SESSION_ID_LENGTH: usize = 256;
+const RANDOM_PASSWORD_LENGTH: usize = 40;
 
 #[cfg(feature = "conduit_bin")]
 #[options("/<_..>")]
