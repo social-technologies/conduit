@@ -64,3 +64,6 @@ Also check out the [milestones](https://git.koesters.xyz/timo/conduit/milestones
 
 Liberapay: <https://liberapay.com/timokoesters/>\
 Bitcoin: `bc1qnnykf986tw49ur7wx9rpw2tevpsztvar5x8w4n`
+
+#### To run locally
+sudo CONDUIT_CONFIG=conduit-example.toml cargo run

@@ -1,5 +1,6 @@
 /target
 **/*.rs.bk
+/db
 
 Rocket.toml
 conduit.toml
